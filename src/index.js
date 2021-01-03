@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 
-const readFile = (pathFile) => {
-    const fullPath = path.resolve(pathFile);
+const readFile = (filepath) => {
+    const fullPath = path.resolve(filepath);
     const data = fs.readFileSync(fullPath, 'utf8');
     return data;
 };
@@ -15,7 +15,7 @@ const gendiff = (filepath1, filepath2) => {
     const parsedData1 = JSON.parse(data1);
     const parsedData2 = JSON.parse(data2);
 
-    const keys = _.union(_.keys(parsedData1), _.keys(parsedData2));
+    const keys = _.union(_.keys(parsedData1), _.keys(parsedData2)).sort();
     const result = {};
 
     for (const key of keys) {
@@ -31,7 +31,7 @@ const gendiff = (filepath1, filepath2) => {
         }
     }
 
-    return JSON.stringify(result);
+    return JSON.stringify(result, null, '\t');
 };
 
 export default gendiff;
