@@ -9,7 +9,9 @@ const readFile = (filepath) => {
 };
 
 const getDiff = (data1, data2) => {
-  const keys = _.union(_.keys(data1), _.keys(data2)).sort();
+  const keys1 = _.keys(data1);
+  const keys2 = _.keys(data2);
+  const keys = _.union(keys1, keys2).sort();
 
   const diff = keys.reduce((acc, key) => {
     if (!_.has(data1, key)) {
