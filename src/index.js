@@ -8,6 +8,30 @@ const readFile = (filepath) => {
   return data;
 };
 
+const getDiff = (data1, data2) => {
+  const keys = _.union(_.keys(data1), _.keys(data2)).sort();
+
+  const diff = keys.reduce((acc, key) => {
+    if (!_.has(data1, key)) {
+      acc[`+ ${key}`] = data2[key];
+      return acc;
+    }
+    if (!_.has(data2, key)) {
+      acc[`- ${key}`] = data1[key];
+      return acc;
+    }
+    if (data1[key] !== data2[key]) {
+      acc[`- ${key}`] = data1[key];
+      acc[`+ ${key}`] = data2[key];
+      return acc;
+    }
+    acc[`${key}`] = data1[key];
+    return acc;
+  }, {});
+
+  return diff;
+};
+
 const gendiff = (filepath1, filepath2) => {
   const data1 = readFile(filepath1);
   const data2 = readFile(filepath2);
@@ -15,27 +39,8 @@ const gendiff = (filepath1, filepath2) => {
   const parsedData1 = JSON.parse(data1);
   const parsedData2 = JSON.parse(data2);
 
-  const keys = _.union(_.keys(parsedData1), _.keys(parsedData2)).sort();
-
-  const result = keys.reduce((acc, key) => {
-    if (!_.has(parsedData1, key)) {
-      acc[`+ ${key}`] = parsedData2[key];
-      return acc;
-    }
-    if (!_.has(parsedData2, key)) {
-      acc[`- ${key}`] = parsedData1[key];
-      return acc;
-    }
-    if (parsedData1[key] !== parsedData2[key]) {
-      acc[`- ${key}`] = parsedData1[key];
-      acc[`+ ${key}`] = parsedData2[key];
-      return acc;
-    }
-    acc[`${key}`] = parsedData1[key];
-    return acc;
-  }, {});
-
-  return JSON.stringify(result, null, 2);
+  const diff = getDiff(parsedData1, parsedData2);
+  return JSON.stringify(diff, null, 2);
 };
 
 export default gendiff;
