@@ -15,8 +15,13 @@ beforeAll(() => {
 });
 
 test('gendiff', () => {
-  const path1 = getFixturePath('file1.json');
-  const path2 = getFixturePath('file2.json');
-  const actual = gendiff(path1, path2);
-  expect(actual).toBe(expected);
+  const pathToJson1 = getFixturePath('file1.json');
+  const pathToJson2 = getFixturePath('file2.json');
+  const actualJson = gendiff(pathToJson1, pathToJson2);
+  expect(actualJson).toBe(expected);
+
+  const pathToYml1 = getFixturePath('file1.yml');
+  const pathToYml2 = getFixturePath('file2.yml');
+  const actualYml = gendiff(pathToYml1, pathToYml2);
+  expect(actualYml).toBe(expected);
 });
