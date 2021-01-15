@@ -1,11 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
+import parse from './parsers.js';
 
-const readFile = (filepath) => {
+const getData = (filepath) => {
   const fullPath = path.resolve(filepath);
+  const type = path.extname(fullPath).slice(1);
   const data = fs.readFileSync(fullPath, 'utf-8');
-  return data;
+  return parse(data, type);
 };
 
 const getDiff = (data1, data2) => {
@@ -35,13 +37,10 @@ const getDiff = (data1, data2) => {
 };
 
 const gendiff = (filepath1, filepath2) => {
-  const data1 = readFile(filepath1);
-  const data2 = readFile(filepath2);
+  const data1 = getData(filepath1);
+  const data2 = getData(filepath2);
 
-  const parsedData1 = JSON.parse(data1);
-  const parsedData2 = JSON.parse(data2);
-
-  const diff = getDiff(parsedData1, parsedData2);
+  const diff = getDiff(data1, data2);
   return JSON.stringify(diff, null, 2);
 };
 

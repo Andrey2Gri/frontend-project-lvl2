@@ -6,4 +6,6 @@
 [![Actions Status](https://github.com/Andrey2Gri/frontend-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/Andrey2Gri/frontend-project-lvl2/actions)
 
 ## gendiff
-[![asciicast](https://asciinema.org/a/MYk6e3VnSIOY99rAsg1EJsY6n.svg)](https://asciinema.org/a/MYk6e3VnSIOY99rAsg1EJsY6n)
+[![asciicast](https://asciinema.org/a/gxeiCsukzUX6cnImR3OHB6A1g.svg)](https://asciinema.org/a/gxeiCsukzUX6cnImR3OHB6A1g)
+
+[![asciicast](https://asciinema.org/a/shCjCbqeGLvX07d1UYnsHse1T.svg)](https://asciinema.org/a/shCjCbqeGLvX07d1UYnsHse1T)
