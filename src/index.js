@@ -2,7 +2,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import parse from './parsers.js';
-import stylish from './stylish.js';
+import chooseFormatter from './formatters/index.js';
 
 const getData = (pathFile) => {
   const fullPath = path.resolve(pathFile);
@@ -65,11 +65,12 @@ const buildAST = (data1, data2) => {
   return keys.map(buildNodeAst(data1, data2, buildAST));
 };
 
-const gendiff = (filepath1, filepath2, formatter = stylish) => {
+const gendiff = (filepath1, filepath2, format = 'stylish') => {
   const beforeData = getData(filepath1);
   const afterData = getData(filepath2);
 
   const ast = buildAST(beforeData, afterData);
+  const formatter = chooseFormatter(format);
   return formatter(ast);
 };
 
