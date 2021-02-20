@@ -6,8 +6,9 @@ const getValue = (element, level, f) => {
   if (!_.isObject(element)) {
     return element;
   }
-  const keys = _.keys(element).sort();
-  const items = keys.map((key) => {
+  const keys = _.keys(element);
+  const sortedKeys = _.sortBy(keys);
+  const items = sortedKeys.map((key) => {
     const value = element[key];
     return `${addIndent(level)}${key}: ${getValue(value, level + 1, f)}`;
   });

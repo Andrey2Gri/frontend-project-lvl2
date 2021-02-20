@@ -78,8 +78,9 @@ const buildNodeAst = (data1, data2, f) => (key) => {
 const buildAST = (data1, data2) => {
   const keys1 = _.keys(data1);
   const keys2 = _.keys(data2);
-  const keys = _.union(keys1, keys2).sort();
-  return keys.map(buildNodeAst(data1, data2, buildAST));
+  const keys = _.union(keys1, keys2);
+  const sortedKeys = _.sortBy(keys);
+  return sortedKeys.map(buildNodeAst(data1, data2, buildAST));
 };
 
 const gendiff = (filepath1, filepath2, format = 'stylish') => {

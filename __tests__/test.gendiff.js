@@ -8,19 +8,10 @@ const __dirname = path.dirname(__filename);
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8');
 
-let resultDefault;
-let resultPlain;
-let resultJson;
-
-beforeAll(() => {
-  resultDefault = readFile('result-default');
-  resultPlain = readFile('result-plain');
-  resultJson = readFile('result-json');
-});
-
 test('gendiff --format stylish (default)', () => {
   const pathToJson1 = getFixturePath('before.json');
   const pathToJson2 = getFixturePath('after.json');
+  const resultDefault = readFile('result-default');
   const actualJson = gendiff(pathToJson1, pathToJson2);
   expect(actualJson).toBe(resultDefault);
 
@@ -33,6 +24,7 @@ test('gendiff --format stylish (default)', () => {
 test('gendiff --format plain', () => {
   const pathToJson1 = getFixturePath('before.json');
   const pathToJson2 = getFixturePath('after.json');
+  const resultPlain = readFile('result-plain');
   const actualJson = gendiff(pathToJson1, pathToJson2, 'plain');
   expect(actualJson).toBe(resultPlain);
 
@@ -45,6 +37,7 @@ test('gendiff --format plain', () => {
 test('gendiff --format json', () => {
   const pathToJson1 = getFixturePath('before.json');
   const pathToJson2 = getFixturePath('after.json');
+  const resultJson = readFile('result-json');
   const actualJson = gendiff(pathToJson1, pathToJson2, 'json');
   expect(actualJson).toBe(resultJson);
 
