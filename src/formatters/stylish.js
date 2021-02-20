@@ -1,59 +1,52 @@
 import _ from 'lodash';
 
-const addIndent = (depth) => ' '.repeat(depth);
+const addIndent = (level) => (level ? ' '.repeat(level * 4) : '');
 
-const getValue = (element, depth, f) => {
-  if (_.isArray(element)) {
-    const values = f(element, depth);
-    return `{\n${values.join('\n')}\n${addIndent(depth - 4)}}`;
-  }
+const getValue = (element, level, f) => {
   if (!_.isObject(element)) {
     return element;
   }
   const keys = _.keys(element).sort();
   const items = keys.map((key) => {
     const value = element[key];
-    return `${addIndent(depth)}${key}: ${getValue(value, depth + 4, f)}`;
+    return `${addIndent(level)}${key}: ${getValue(value, level + 1, f)}`;
   });
-  return `{\n${items.join('\n')}\n${addIndent(depth - 4)}}`;
+  return `{\n${items.join('\n')}\n${addIndent(level - 1)}}`;
+};
+
+const builder = (node, level, status = '') => {
+  const { name, value } = node;
+  const space = addIndent(level);
+  const beginningSpace = status === '' ? space : space.slice(2);
+  return `${beginningSpace}${status}${name}: ${getValue(value, level + 1)}`;
 };
 
 const mapping = {
-  added: (node, depth) => {
-    const { key, value } = node;
-    return `${addIndent(depth - 2)}+ ${key}: ${getValue(value, depth + 4)}`;
+  added: (node, level) => builder(node, level, '+ '),
+  removed: (node, level) => builder(node, level, '- '),
+  unchanged: (node, level) => builder(node, level),
+  nested: (node, level, f) => {
+    const { name, children } = node;
+    const value = f(children, level + 1);
+    return builder({ name, value }, level);
   },
-  deleted: (node, depth) => {
-    const { key, value } = node;
-    return `${addIndent(depth - 2)}- ${key}: ${getValue(value, depth + 4)}`;
-  },
-  nested: (node, depth, f) => {
-    const { key, value } = node;
-    return `${addIndent(depth)}${key}: ${getValue(value, depth + 4, f)}`;
-  },
-  unchanged: (node, depth) => {
-    const { key, value } = node;
-    return `${addIndent(depth)}${key}: ${value}`;
-  },
-  changed: (node, depth) => {
-    const {
-      key,
-      value: { oldValue, newValue },
-    } = node;
-    const oldValueStr = `${addIndent(depth - 2)}- ${key}: ${getValue(oldValue, depth + 4)}`;
-    const newValueStr = `${addIndent(depth - 2)}+ ${key}: ${getValue(newValue, depth + 4)}`;
-    return `${oldValueStr}\n${newValueStr}`;
+  updated: (node, level) => {
+    const { name, value: { oldValue, newValue } } = node;
+    const oldNode = { name, value: oldValue };
+    const newNode = { name, value: newValue };
+    return `${builder(oldNode, level, '- ')}\n${builder(newNode, level, '+ ')}`;
   },
 };
 
-const render = (ast) => {
-  const iter = (tree, depth) => tree.map((node) => {
+const renderIter = (tree, level) => {
+  const elements = tree.map((node) => {
     const { type } = node;
-    const element = mapping[type](node, depth, iter);
-    return element;
+    const builderElement = mapping[type];
+    return builderElement(node, level, renderIter);
   });
-  const elements = iter(ast, 4);
-  return `{\n${elements.join('\n')}\n}`;
+  return `{\n${elements.join('\n')}\n${addIndent(level - 1)}}`;
 };
+
+const render = (ast) => renderIter(ast, 1);
 
 export default render;

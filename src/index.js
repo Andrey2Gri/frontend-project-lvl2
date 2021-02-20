@@ -21,33 +21,50 @@ const isObject = (coll) => {
 const mapping = [
   {
     type: 'added',
-    predicant: (beforeData, afterData, key) => !_.has(beforeData, key),
-    parseItem: (beforeData, afterData, key) => ({ value: afterData[key] }),
+    predicant: (beforeData, afterData, name) => !_.has(beforeData, name),
+    parseItem: (beforeData, afterData, name) => ({
+      value: afterData[name],
+      children: null,
+    }),
   },
   {
-    type: 'deleted',
-    predicant: (beforeData, afterData, key) => !_.has(afterData, key),
-    parseItem: (beforeData, afterData, key) => ({ value: beforeData[key] }),
+    type: 'removed',
+    children: null,
+    predicant: (beforeData, afterData, name) => !_.has(afterData, name),
+    parseItem: (beforeData, afterData, name) => ({
+      value: beforeData[name],
+      children: null,
+    }),
   },
   {
     type: 'nested',
-    predicant: (beforeData, afterData, key) => isObject(beforeData[key])
-      && isObject(afterData[key]),
-    parseItem: (beforeData, afterData, key, f) => ({ value: f(beforeData[key], afterData[key]) }),
+    value: null,
+    predicant: (beforeData, afterData, name) => isObject(beforeData[name])
+      && isObject(afterData[name]),
+    parseItem: (beforeData, afterData, name, f) => ({
+      value: null,
+      children: f(beforeData[name], afterData[name]),
+    }),
   },
   {
     type: 'unchanged',
-    predicant: (beforeData, afterData, key) => beforeData[key] === afterData[key],
-    parseItem: (beforeData, afterData, key) => ({ value: beforeData[key] }),
+    children: null,
+    predicant: (beforeData, afterData, name) => beforeData[name] === afterData[name],
+    parseItem: (beforeData, afterData, name) => ({
+      value: beforeData[name],
+      children: null,
+    }),
   },
   {
-    type: 'changed',
-    predicant: (beforeData, afterData, key) => beforeData[key] !== afterData[key],
-    parseItem: (beforeData, afterData, key) => ({
+    type: 'updated',
+    children: null,
+    predicant: (beforeData, afterData, name) => beforeData[name] !== afterData[name],
+    parseItem: (beforeData, afterData, name) => ({
       value: {
-        oldValue: beforeData[key],
-        newValue: afterData[key],
+        oldValue: beforeData[name],
+        newValue: afterData[name],
       },
+      children: null,
     }),
   },
 ];
@@ -55,7 +72,7 @@ const mapping = [
 const buildNodeAst = (data1, data2, f) => (key) => {
   const mappingItem = mapping.find(({ predicant }) => predicant(data1, data2, key));
   const { type, parseItem } = mappingItem;
-  return { key, type, ...parseItem(data1, data2, key, f) };
+  return { name: key, type, ...parseItem(data1, data2, key, f) };
 };
 
 const buildAST = (data1, data2) => {

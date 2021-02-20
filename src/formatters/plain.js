@@ -7,30 +7,32 @@ const buildValue = (value) => {
   return _.isString(value) ? `'${value}'` : value;
 };
 
+const buildPath = (items) => items.join('.');
+
 const events = {
-  added: (path, value) => `Property '${path}' was added with value: ${buildValue(value)}`,
-  deleted: (path) => `Property '${path}' was removed`,
-  changed: (path, value) => {
+  added: (path, { value }) => `Property '${buildPath(path)}' was added with value: ${buildValue(value)}`,
+  removed: (path) => `Property '${buildPath(path)}' was removed`,
+  updated: (path, { value }) => {
     const { oldValue, newValue } = value;
-    return `Property '${path}' was updated. From ${buildValue(oldValue)} to ${buildValue(newValue)}`;
+    return `Property '${buildPath(path)}' was updated. From ${buildValue(oldValue)} to ${buildValue(newValue)}`;
   },
+  nested: (path, { children }, f) => f(children, path),
 };
 
-const render = (ast) => {
-  const iter = (tree, pathItems) => tree.flatMap((node) => {
-    const { key, type, value } = node;
-    const newPathItems = [...pathItems, key];
-    if (type === 'nested') {
-      return iter(value, newPathItems);
-    }
-    const fullPath = newPathItems.join('.');
-    const buildDescriptionProperty = _.get(events, type, null);
-    return buildDescriptionProperty ? buildDescriptionProperty(fullPath, value) : null;
-  });
+const getDescriptions = (tree, pathItems) => tree.flatMap((node) => {
+  const { name, type } = node;
+  const newPathItems = [...pathItems, name];
+  const buildDescription = _.get(events, type, null);
+  if (!buildDescription) {
+    return null;
+  }
+  return buildDescription(newPathItems, node, getDescriptions);
+});
 
-  const propertys = iter(ast, []);
-  const filteredPropertys = propertys.filter((p) => p);
-  return filteredPropertys.join('\n');
+const render = (ast) => {
+  const descriptions = getDescriptions(ast, []);
+  const filteredDescriptions = descriptions.filter((p) => p);
+  return filteredDescriptions.join('\n');
 };
 
 export default render;
